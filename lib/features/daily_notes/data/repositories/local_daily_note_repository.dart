@@ -1,7 +1,7 @@
+import 'package:mytodo/core/data/local/hive_database.dart';
+import 'package:mytodo/features/daily_notes/domain/models/daily_note.dart';
+import 'package:mytodo/features/daily_notes/domain/repositories/daily_note_repository.dart';
 import 'package:uuid/uuid.dart';
-import 'package:todo_for_myself_mobile_app/core/data/local/hive_database.dart';
-import 'package:todo_for_myself_mobile_app/features/daily_notes/domain/models/daily_note.dart';
-import 'package:todo_for_myself_mobile_app/features/daily_notes/domain/repositories/daily_note_repository.dart';
 
 class LocalDailyNoteRepository implements DailyNoteRepository {
   LocalDailyNoteRepository({Uuid? uuid}) : _uuid = uuid ?? const Uuid();
@@ -15,17 +15,19 @@ class LocalDailyNoteRepository implements DailyNoteRepository {
   }) async {
     await HiveDatabase.initialize();
 
+    final normalizedDate = _normalizeDate(date);
+    final trimmedContent = content.trim();
     final now = DateTime.now();
-    final existing = await getByDate(date);
+    final existing = await getByDate(normalizedDate);
 
     final note = existing?.copyWith(
-          content: content,
+          content: trimmedContent,
           updatedAt: now,
         ) ??
         DailyNote(
           id: _uuid.v4(),
-          date: _normalizeDate(date),
-          content: content,
+          date: normalizedDate,
+          content: trimmedContent,
           createdAt: now,
           updatedAt: now,
         );
